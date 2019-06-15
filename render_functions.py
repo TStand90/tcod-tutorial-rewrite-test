@@ -6,4 +6,5 @@ def render_all(console: Console, entities, game_map, colors):
 
     # Draw all entities in the list
     for entity in entities:
-        console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)
+        if game_map.fov[entity.x, entity.y]:
+            console.print(x=entity.x, y=entity.y, string=entity.char, fg=entity.color)

@@ -84,9 +84,15 @@ def main():
     room_min_size = 6
     max_rooms = 30
 
+    fov_algorithm = 12
+    fov_light_walls = True
+    fov_radius = 10
+
     colors = {
         'dark_wall': tcod.Color(0, 0, 100),
-        'dark_ground': tcod.Color(50, 50, 150)
+        'dark_ground': tcod.Color(50, 50, 150),
+        'light_wall': tcod.Color(130, 110, 50),
+        'light_ground': tcod.Color(200, 180, 50)
     }
 
     player = Entity(int(screen_width / 2), int(screen_height / 2), '@', tcod.white)
@@ -95,6 +101,8 @@ def main():
 
     game_map = GameMap(map_width, map_height)
     game_map.make_map(max_rooms, room_min_size, room_max_size, map_width, map_height, player)
+
+    fov_recompute = True
 
     # Setup the font.
     tcod.console_set_custom_font(
@@ -111,7 +119,13 @@ def main():
         vsync=True
     ) as root_console:
         while True:
+            if fov_recompute:
+                game_map.compute_fov(player.x, player.y, radius=fov_radius, light_walls=fov_light_walls,
+                                     algorithm=fov_algorithm)
+
             render_all(root_console, entities, game_map, colors)
+
+            fov_recompute = False
 
             # Show the console
             tcod.console_flush()
@@ -135,6 +149,8 @@ def main():
 
                         if not game_map.is_blocked(player.x + dx, player.y + dy):
                             player.move(dx, dy)
+
+                            fov_recompute = True
 
                     if full_screen:
                         tcod.console_set_fullscreen(not tcod.console_is_fullscreen())

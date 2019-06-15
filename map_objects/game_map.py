@@ -8,6 +8,7 @@ from map_objects.rectangle import Rect
 class GameMap(Map):
     def __init__(self, width, height):
         super().__init__(width, height, order='F')
+        self.explored = [[False for y in range(height)] for x in range(width)]
 
         self.initialize_tiles()
 
@@ -95,9 +96,18 @@ class GameMap(Map):
         """
         for y in range(self.height):
             for x in range(self.width):
+                visible = self.fov[x, y]
                 wall = self.is_blocked(x, y)
 
-                if wall:
-                    console.print(x=x, y=y, string=' ', bg=colors.get('dark_wall'))
-                else:
-                    console.print(x=x, y=y, string=' ', bg=colors.get('dark_ground'))
+                if visible:
+                    if wall:
+                        console.print(x=x, y=y, string=' ', bg=colors.get('light_wall'))
+                    else:
+                        console.print(x=x, y=y, string=' ', bg=colors.get('light_ground'))
+
+                    self.explored[x][y] = True
+                elif self.explored[x][y]:
+                    if wall:
+                        console.print(x=x, y=y, string=' ', bg=colors.get('dark_wall'))
+                    else:
+                        console.print(x=x, y=y, string=' ', bg=colors.get('dark_ground'))
